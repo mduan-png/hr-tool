@@ -557,7 +557,7 @@
 .admin-reset-av{width:34px;height:34px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
 </style>
 </head>
-<body>
+<body style="visibility:hidden;">
 
 <div id="edit-mode-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9000;background:#1565c0;color:#fff;padding:8px 20px;font-size:13px;font-weight:600;align-items:center;justify-content:center;gap:12px;">
   ✏️ Edit Mode — Sync paused for employee table. Other pages sync normally.
@@ -5227,9 +5227,17 @@ function mergeFormerEmployees(imported) {
     if (!pw) { err.textContent = 'Please enter your password.'; return; }
     if (h(pw) !== spwd(em)) { err.textContent = 'Incorrect password. Please try again.'; return; }
     _user = em;
-    localStorage.setItem('hr_session', JSON.stringify({email:em, ts:Date.now()}));
+    var sessionData = {email:em, ts:Date.now()};
+    localStorage.setItem('hr_session', JSON.stringify(sessionData));
     localStorage.setItem('hr_last_email', em); // remember email for next time
+    // Also sync session to sheet so other browsers can restore it
+    if (typeof syncFetch === 'function' && typeof SYNC_URL !== 'undefined') {
+      var sessionKey = 'session_' + em.replace(/[@.]/g,'_');
+      syncFetch(SYNC_URL + '?action=write&key=' + encodeURIComponent(sessionKey) +
+        '&value=' + encodeURIComponent(JSON.stringify(sessionData))).catch(function(){});
+    }
     document.getElementById('login-overlay').style.display = 'none';
+    document.body.style.visibility = 'visible';
     renderBadge();
     // Restore last active tab
     var lastTab = localStorage.getItem('hr_last_tab') || 'meeting';
@@ -5325,7 +5333,11 @@ function mergeFormerEmployees(imported) {
         if (s.email && ALLOWED[s.email] && (Date.now()-s.ts < 30*24*3600*1000)) {
           // Valid session — auto login immediately
           _user = s.email;
+          // Refresh session timestamp
+          s.ts = Date.now();
+          localStorage.setItem('hr_session', JSON.stringify(s));
           document.getElementById('login-overlay').style.display = 'none';
+          document.body.style.visibility = 'visible';
           renderBadge();
           var lastTab = localStorage.getItem('hr_last_tab') || 'meeting';
           if (typeof showTab === 'function') {
@@ -5353,6 +5365,7 @@ function mergeFormerEmployees(imported) {
     if (btnEl) { btnEl.textContent = 'Loading...'; btnEl.disabled = true; }
     if (errEl) errEl.textContent = '';
     document.getElementById('login-overlay').style.display = 'flex';
+    document.body.style.visibility = 'visible';
 
     // Fetch latest passwords from cloud (with 5s timeout)
     var pwdFetched = false;
@@ -5369,17 +5382,38 @@ function mergeFormerEmployees(imported) {
       }, 100);
     }
 
-    // Try to fetch passwords from sheet
+    // Try to fetch passwords + sessions from sheet
     if (typeof syncFetch === 'function' && typeof SYNC_URL !== 'undefined') {
       syncFetch(SYNC_URL + '?action=read&t=' + Date.now())
         .then(function(data) {
           if (data && !data.error) {
+            // Load passwords
             Object.keys(data).forEach(function(k) {
               if (k.indexOf('hr_pwd_') === 0) {
                 _pwds[k] = data[k];
-                localStorage.setItem(k, data[k]); // cache locally too
+                localStorage.setItem(k, data[k]);
               }
             });
+            // Check if there's a valid session for the pre-filled email
+            if (fillEmail && ALLOWED[fillEmail]) {
+              var sessionKey = 'session_' + fillEmail.replace(/[@.]/g,'_');
+              if (data[sessionKey]) {
+                try {
+                  var remoteSession = JSON.parse(data[sessionKey]);
+                  if (remoteSession.email && (Date.now() - remoteSession.ts < 30*24*3600*1000)) {
+                    // Valid remote session found - auto login!
+                    _user = remoteSession.email;
+                    localStorage.setItem('hr_session', JSON.stringify(remoteSession));
+                    document.getElementById('login-overlay').style.display = 'none';
+                    document.body.style.visibility = 'visible';
+                    renderBadge();
+                    var lastTab = localStorage.getItem('hr_last_tab') || 'meeting';
+                    if (typeof showTab === 'function') showTab(lastTab);
+                    return;
+                  }
+                } catch(e) {}
+              }
+            }
           }
           onPwdFetchDone();
         })
