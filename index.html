@@ -737,7 +737,7 @@
       <span class="nav-badge" id="5y-count-badge" style="display:none">0</span>
     </button>
     <button class="nav-item" onclick="showMilestoneTab('10y')" id="nav-10y">
-      <span class="nav-icon">🏆</span> 8th Anniversary
+      <span class="nav-icon">🏆</span> 10th Anniversary
       <span class="nav-badge" id="10y-count-badge" style="display:none">0</span>
     </button>
     <button class="nav-item" onclick="showTab('email')" id="nav-email-ms">
@@ -871,7 +871,7 @@
             <div><label style="font-size:12px;color:#666;display:block">Probation End Date</label><input id="ef-reg" type="date" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;margin-top:4px"></div>
             <div><label style="font-size:12px;color:#666;display:block">3rd Anniversary</label><input id="ef-ann3" type="date" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;margin-top:4px"></div>
             <div><label style="font-size:12px;color:#666;display:block">5th Anniversary</label><input id="ef-ann5" type="date" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;margin-top:4px"></div>
-            <div><label style="font-size:12px;color:#666;display:block">8th Anniversary</label><input id="ef-ann10" type="date" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;margin-top:4px"></div>
+            <div><label style="font-size:12px;color:#666;display:block">10th Anniversary</label><input id="ef-ann10" type="date" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;margin-top:4px"></div>
             <div><label style="font-size:12px;color:#666;display:block">Province</label><input id="ef-province" type="text" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;margin-top:4px"></div>
             <div><label style="font-size:12px;color:#666;display:block">City</label><input id="ef-city" type="text" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;margin-top:4px"></div>
           </div>
@@ -1033,7 +1033,7 @@
             <button class="btn" onclick="editTemplate('reg')"     >🎉 Probation End Congrats</button>
             <button class="btn" onclick="editTemplate('3y')"       id="btn-3ann">🥉 3rd Anniversary Congrats</button>
             <button class="btn" onclick="editTemplate('5y')"       id="btn-5ann">🥈 5th Anniversary Congrats</button>
-            <button class="btn" onclick="editTemplate('10y')"      id="btn-10ann">🏆 8th Anniversary Congrats</button>
+            <button class="btn" onclick="editTemplate('10y')"      id="btn-10ann">🏆 10th Anniversary Congrats</button>
           </div>
           <div id="template-edit-area" style="display:none">
             <div style="font-size:12px;font-weight:600;color:var(--gray-mid);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px" id="template-edit-label"></div>
@@ -1737,7 +1737,7 @@ const MILESTONES = [
   { key:'reg', label:'Probation End(6mo)', dateCol:'Date of Probation End', cls:'b-reg' },
   { key:'3y',  label:'3rd Anniversary',       dateCol:'3rd Anniversary',         cls:'b-3y'  },
   { key:'5y',  label:'5th Anniversary',       dateCol:'5th Anniversary',         cls:'b-5y'  },
-  { key:'10y', label:'8th Anniversary',      dateCol:'8th Anniversary',        cls:'b-10y' },
+  { key:'10y', label:'10th Anniversary',      dateCol:'10th Anniversary',        cls:'b-10y' },
 ];
 
 function toJSDate(v) {
@@ -1854,7 +1854,7 @@ function renderToday() {
   if (counts.reg > 0) statsCards.push(`<div class="stat"><div class="stat-num">${counts.reg}</div><div class="stat-label">Probation End</div></div>`);
   if (counts['3y'] > 0) statsCards.push(`<div class="stat"><div class="stat-num">${counts['3y']}</div><div class="stat-label">3rd Anniversary</div></div>`);
   if (counts['5y'] > 0) statsCards.push(`<div class="stat"><div class="stat-num">${counts['5y']}</div><div class="stat-label">5th Anniversary</div></div>`);
-  if (counts['10y'] > 0) statsCards.push(`<div class="stat"><div class="stat-num">${counts['10y']}</div><div class="stat-label">8th Anniversary</div></div>`);
+  if (counts['10y'] > 0) statsCards.push(`<div class="stat"><div class="stat-num">${counts['10y']}</div><div class="stat-label">10th Anniversary</div></div>`);
   if (bdHits.length > 0) statsCards.push(`<div class="stat"><div class="stat-num">${bdHits.length}</div><div class="stat-label">🎂 Birthday</div></div>`);
   statsEl.innerHTML = statsCards.length
     ? `<div class="stats">${statsCards.join('')}</div>`
@@ -1988,8 +1988,8 @@ function setMilestoneSub(key) {
   const navEl = document.getElementById('nav-'+key);
   if (navEl) navEl.classList.add('active');
   // Update page title and subtitle
-  const titleMap = { reg:'Probation End List', '3y':'3rd Anniversary List', '5y':'5th Anniversary List', '10y':'8th Anniversary List' };
-  const subMap   = { reg:'Completed 6-month probation', '3y':'3rd Anniversary', '5y':'5th Anniversary', '10y':'8th Anniversary' };
+  const titleMap = { reg:'Probation End List', '3y':'3rd Anniversary List', '5y':'5th Anniversary List', '10y':'10th Anniversary List' };
+  const subMap   = { reg:'Completed 6-month probation', '3y':'3rd Anniversary', '5y':'5th Anniversary', '10y':'10th Anniversary' };
   const ptEl = document.getElementById('milestone-page-title');
   const psEl = document.getElementById('milestone-page-sub');
   if (ptEl) ptEl.textContent = titleMap[key] || 'Annual Milestones';
@@ -2183,7 +2183,7 @@ function renderWeek() {
     <div class="stat"><div class="stat-num">${cntReg}</div><div class="stat-label">Probation End</div></div>
     <div class="stat"><div class="stat-num">${cnt3y}</div><div class="stat-label">3rd Anniversary</div></div>
     <div class="stat"><div class="stat-num">${cnt5y}</div><div class="stat-label">5th Anniversary</div></div>
-    <div class="stat"><div class="stat-num">${cnt10y}</div><div class="stat-label">8th Anniversary</div></div>
+    <div class="stat"><div class="stat-num">${cnt10y}</div><div class="stat-label">10th Anniversary</div></div>
   </div>`;
 
   if (!days.length) {
@@ -2595,9 +2595,9 @@ const MSG_TEMPLATES = {
   '5y_manager': (emp) =>
     `Hi ${emp.manager||'Manager'}，\n\n${emp.enName||emp.cnName} has reached their 5th Anniversary today 🥈. Please extend your congratulations!\n\n— HR`,
   '10y': (emp) =>
-    `Hi ${emp.enName||emp.cnName}！\n\nCongratulations on your 8th Anniversary 🏆! Ten years together — you are one of Conviva's most valuable assets！\n\n— HR Team`,
+    `Hi ${emp.enName||emp.cnName}！\n\nCongratulations on your 10th Anniversary 🏆! Ten years together — you are one of Conviva's most valuable assets！\n\n— HR Team`,
   '10y_manager': (emp) =>
-    `Hi ${emp.manager||'Manager'}，\n\n${emp.enName||emp.cnName} has reached their 8th Anniversary today 🏆. This is an important milestone — please give special congratulations!\n\n— HR`,
+    `Hi ${emp.manager||'Manager'}，\n\n${emp.enName||emp.cnName} has reached their 10th Anniversary today 🏆. This is an important milestone — please give special congratulations!\n\n— HR`,
 };
 
 
@@ -2611,7 +2611,7 @@ function openSlackModal(emp, type) {
   _modalCurrentTab = 'employee';
   const isEmployee = true;
   const cleanType = type.replace('_mgr','');
-  const titles = { birthday:'🎂 Birthday Wish', reg:'🎉 Probation End Congrats', "3y":'🥉 3rd Anniversary Congrats', "5y":'🥈 5th Anniversary Congrats', "10y":'🏆 8th Anniversary Congrats' };
+  const titles = { birthday:'🎂 Birthday Wish', reg:'🎉 Probation End Congrats', "3y":'🥉 3rd Anniversary Congrats', "5y":'🥈 5th Anniversary Congrats', "10y":'🏆 10th Anniversary Congrats' };
   const startTab = type.endsWith('_mgr') ? 'manager' : 'employee';
   document.getElementById('slackModal').dataset.type = cleanType;
   document.getElementById('modalTitle').textContent = titles[type] || '💬 Send Slack Message';
@@ -2721,7 +2721,7 @@ const TEMPLATE_LABELS = {
   reg: '🎉 Probation End Congrats（Send to Employee）',
   '3y': '🥉 3rd Anniversary Congrats',
   '5y': '🥈 5th Anniversary Congrats',
-  '10y': '🏆 8th Anniversary Congrats',
+  '10y': '🏆 10th Anniversary Congrats',
 };
 
 function editTemplate(key) {
@@ -2777,7 +2777,7 @@ MILESTONE_COLS = {
     'Date of Probation End': ('reg',  'Probation End(6mo)'),
     '3rd Anniversary':        ('3y',   '3rd Anniversary'),
     '5th Anniversary':        ('5y',   '5th Anniversary'),
-    '8th Anniversary':       ('10y',  '8th Anniversary'),
+    '10th Anniversary':       ('10y',  '10th Anniversary'),
 }
 
 MESSAGES = {
@@ -2789,8 +2789,8 @@ MESSAGES = {
     '3y_mgr': lambda cn,en,mgr: f"Hi {mgr}, {cn} has reached their 3rd Anniversary today 🥉! — HR",
     '5y':   lambda cn,en: f"Hi {cn}! Congratulations on your 5th Anniversary! 🥈 Thank you for five great years! — HR",
     '5y_mgr': lambda cn,en,mgr: f"Hi {mgr}, {cn} has reached their 5th Anniversary today 🥈! — HR",
-    '10y':  lambda cn,en: f"Hi {cn}! Congratulations on your 8th Anniversary! 🏆 You are one of Conviva's most valuable assets! — HR",
-    '10y_mgr': lambda cn,en,mgr: f"Hi {mgr}, {cn} is celebrating their 8th Anniversary today 🏆. Please give special congratulations! — HR",
+    '10y':  lambda cn,en: f"Hi {cn}! Congratulations on your 10th Anniversary! 🏆 You are one of Conviva's most valuable assets! — HR",
+    '10y_mgr': lambda cn,en,mgr: f"Hi {mgr}, {cn} is celebrating their 10th Anniversary today 🏆. Please give special congratulations! — HR",
 }
 
 def find_user(email):
@@ -3875,7 +3875,7 @@ function renderEmpTable() {
     th('China Dept') + th('Global Dept') + th('Title') + th('Manager') +
     th('Company Email') + th('Personal Email') + th('Mobile') + th('ID Number') +
     th('Birthday') + th('Onboard') + th('Probation End') +
-    th('3rd Anniversary') + th('5th Anniversary') + th('8th Anniversary') +
+    th('3rd Anniversary') + th('5th Anniversary') + th('10th Anniversary') +
     th('Province') + th('City') + th('Address') + th('Actions') +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
@@ -3974,7 +3974,7 @@ function exportToExcel() {
   // Chinese name, Direct Manager, Name, Gender, China office ID,
   // Company Email, (col12 empty), Personal Email, Mobile Number, ID Number,
   // (col16 empty), Date of Birth, Birth Month, Onboarding Date,
-  // Date of Probation End, 3rd Anniversary, 5th Anniversary, 8th Anniversary,
+  // Date of Probation End, 3rd Anniversary, 5th Anniversary, 10th Anniversary,
   // Ancestral Province, Ancestral City, Address
 
   var headers = [
@@ -3982,7 +3982,7 @@ function exportToExcel() {
     'Chinese name', 'Direct Manager', 'Name', 'Gender', 'China office ID',
     'Company Email', '', 'Personal Email', 'Mobile Number', 'ID Number',
     '', 'Date of Birth', 'Birth Month', 'Onboarding Date',
-    'Date of Probation End', '3rd Anniversary', '5th Anniversary', '8th Anniversary',
+    'Date of Probation End', '3rd Anniversary', '5th Anniversary', '10th Anniversary',
     'Ancestral Province', 'Ancestral City', 'Address'
   ];
 
@@ -4017,7 +4017,7 @@ function exportToExcel() {
       fmtDate(md.reg),          // Date of Probation End
       fmtDate(md['3y']),        // 3rd Anniversary
       fmtDate(md['5y']),        // 5th Anniversary
-      fmtDate(md['10y']),       // 8th Anniversary
+      fmtDate(md['10y']),       // 10th Anniversary
       e.province || '',         // Ancestral Province
       e.city || '',             // Ancestral City
       e.address || ''           // Address
@@ -4757,7 +4757,7 @@ MILESTONE_COLS = {
     'Date of Probation End':'Probation End(6mo)',
     '3rd Anniversary':'3rd Anniversary',
     '5th Anniversary':'5th Anniversary',
-    '8th Anniversary':'8th Anniversary'
+    '10th Anniversary':'10th Anniversary'
 }
 
 def load_employees():
@@ -4846,7 +4846,7 @@ function parseEmployees(data) {
     reg:      'Date of Probation End',
     ann3:     '3rd Anniversary',
     ann5:     '5th Anniversary',
-    ann10:    '8th Anniversary',
+    ann10:    '10th Anniversary',
     province: 'Ancestral Province',
     city:     'Ancestral City',
     address:  'Address',
@@ -4943,7 +4943,7 @@ function parseEmployees(data) {
         reg:  toDate(getVal(r,'Date of Probation End')),
         '3y': toDate(getVal(r,'3rd Anniversary')),
         '5y': toDate(getVal(r,'5th Anniversary')),
-        '10y':toDate(getVal(r,'8th Anniversary')),
+        '10y':toDate(getVal(r,'10th Anniversary')),
       }
     });
   }
