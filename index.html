@@ -3105,48 +3105,49 @@ function meetingAutoFill() {
     return;
   }
 
-  // Parse monday as UTC to match stored dates
   var parts = mondayStr.split('-');
   var mon = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])));
-  var milestoneLines = [];
 
-  // Collect this week's milestones (excl. birthdays)
+  // Group milestones by type
+  var milestoneGroups = {}; // key -> [{name, dateStr}]
   for (var i = 0; i < 7; i++) {
     var d = new Date(mon.getTime() + i * 86400000);
     employees.forEach(function(emp) {
       MILESTONES.forEach(function(m) {
         var md = emp.milestoneDates[m.key];
         if (!md) return;
-        var mdate = md instanceof Date ? md : new Date(md);
+        var mdate = toD(md);
+        if (!mdate) return;
         if (mdate.getUTCFullYear() === d.getUTCFullYear() &&
             mdate.getUTCMonth() === d.getUTCMonth() &&
             mdate.getUTCDate() === d.getUTCDate()) {
-          var dateStr = (d.getUTCMonth()+1) + '/' + d.getUTCDate() + '/' + d.getUTCFullYear();
-          var name = (emp.enName || emp.cnName) + (emp.cnName && emp.enName ? ' (' + emp.cnName + ')' : '');
-          milestoneLines.push(m.label + ': ' + name + ' ' + dateStr);
+          if (!milestoneGroups[m.key]) milestoneGroups[m.key] = {label: m.label, emps: []};
+          var name = (emp.enName || emp.cnName);
+          var dateStr = (d.getUTCMonth()+1) + '/' + d.getUTCDate();
+          milestoneGroups[m.key].emps.push(name + ' ' + dateStr);
         }
       });
     });
   }
 
-  // Build this week's milestone text
-  var milestoneText = milestoneLines.length
-    ? milestoneLines.join('\n')
-    : 'No probation ends or anniversaries this week';
+  // Build milestone text with sequential numbering and blank lines between sections
+  var ANNIVERSARY_NOTE = '(暂未通知员工及领导准备发言内容，暂未取出纪念币，暂未放置来庭)';
+  var sections = [];
+  var seq = 1;
 
-  // Preserve existing birthday info (keep 🎂 lines)
-  var existingHr = data.hr || '';
-  var bdLines = existingHr.split('\n').filter(function(line) {
-    return line.indexOf('🎂') !== -1;
+  // Order: reg(Probation End), 3y, 5y, 10y
+  MILESTONES.forEach(function(m) {
+    var g = milestoneGroups[m.key];
+    if (!g) return;
+    if (m.key === 'reg') {
+      sections.push(seq + '. ' + g.label + ': (暂未通知员工及领导准备发言内容)\n' + g.emps.join(', '));
+    } else {
+      sections.push(seq + '. ' + g.label + ': ' + ANNIVERSARY_NOTE + '\n' + g.emps.join(', '));
+    }
+    seq++;
   });
 
-  // Combine: milestones first, then birthday info
-  var newHr = milestoneText;
-  if (bdLines.length) {
-    newHr = newHr + '\n' + bdLines.join('\n');
-  }
-
-  // Also ensure current month birthday info is written for this week if it's the 2nd Monday
+  // Birthday info on 2nd Monday of month
   var weekMonth = mon.getUTCMonth();
   var weekYear = mon.getUTCFullYear();
   var firstDay = new Date(Date.UTC(weekYear, weekMonth, 1));
@@ -3159,12 +3160,20 @@ function meetingAutoFill() {
     var bdEmps = employees.filter(function(e) {
       return e.dobMonth === weekMonth && e.dobDay != null;
     });
-    if (bdEmps.length && newHr.indexOf('🎂 Birthdays this month') === -1) {
+    if (bdEmps.length) {
       var names = bdEmps.map(function(e) {
         return (e.enName || e.cnName) + ' ' + (weekMonth+1) + '/' + e.dobDay;
       }).join(', ');
-      newHr = newHr + '\n🎂 Birthdays this month: ' + names;
+      sections.push(seq + '. 🎂 Birthdays this month: (蛋糕暂未定，礼物暂未发)\n' + names);
+      seq++;
     }
+  }
+
+  var newHr;
+  if (sections.length === 0) {
+    newHr = 'No probation ends, anniversaries, or birthdays this week';
+  } else {
+    newHr = sections.join('\n\n');
   }
 
   data.hr = newHr;
@@ -3190,11 +3199,22 @@ function meetingSave() {
   if (btn) { btn.textContent = '✅ Saved'; setTimeout(function(){ btn.textContent = '💾 Save'; }, 1500); }
 }
 
+var _deletedMeetingKeys = {};
+
 function meetingDelete() {
   var mondayStr = getMeetingWeekMonday(_meetingWeekOffset);
   if (!confirm("Delete this week's record?")) return;
+  var key = 'meeting_' + mondayStr;
+  // Mark as deleted so syncPull won't restore it
+  _deletedMeetingKeys[key] = Date.now();
+  // Remove from localStorage
   try { localStorage.removeItem(meetingStorageKey(mondayStr)); } catch(e) {}
-  if (typeof syncDelete === 'function') syncDelete('meeting_' + mondayStr);
+  // Push deletion to Google Sheet
+  if (typeof syncFetch === 'function' && typeof SYNC_URL !== 'undefined') {
+    syncFetch(SYNC_URL + '?action=delete&key=' + encodeURIComponent(key)).catch(function(){});
+  }
+  if (typeof syncDelete === 'function') syncDelete(key);
+  _meetingWeekOffset = 0;
   renderMeeting();
 }
 
@@ -3259,7 +3279,6 @@ function renderMeeting() {
     '</tbody>' +
     '</table>' +
     '<div style="display:flex;gap:8px;margin-top:12px;align-items:center">' +
-    '<button class="btn btn-green" id="meeting-save-btn" onclick="meetingSave()">' + '💾 Save' + '</button>' +
     '<button class="btn" onclick="meetingDelete()" style="color:#e74c3c;border-color:#e74c3c">' + '🗑 Delete This Week' + '</button>' +
     '<span id="meeting-autosave-hint" style="font-size:12px;color:var(--gray-mid);margin-left:8px"></span>' +
     '<span id="meeting-sync-time" style="font-size:11px;color:#aaa;margin-left:auto"></span>' +
@@ -3451,6 +3470,15 @@ function syncPull() {
             var isEditingThisWeek = activeMeetingInput && (
               key === 'meeting_' + getMeetingWeekMonday(_meetingWeekOffset)
             );
+            // Skip if this key was recently deleted by user
+            if (_deletedMeetingKeys && _deletedMeetingKeys[key]) {
+              // Clear the deleted flag after 30 seconds (Google Sheet should be updated by then)
+              if (Date.now() - _deletedMeetingKeys[key] > 3000) {
+                delete _deletedMeetingKeys[key];
+              } else {
+                return; // don't restore deleted data
+              }
+            }
             if (!isEditingThisWeek) {
               localStorage.setItem(key, remoteVal);
               meetingUpdated = true;
