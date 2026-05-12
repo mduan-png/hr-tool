@@ -5210,8 +5210,15 @@ function renderFormerPanel() {
   }
 
   function fmtDate(v) {
-    if (!v) return '-';
-    return String(v).slice(0,10);
+    if (!v || v === '-') return '-';
+    var s = String(v).trim();
+    if (!s) return '-';
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return s;
+    var mx = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (mx) return parseInt(mx[2]) + '/' + parseInt(mx[3]) + '/' + mx[1];
+    var d = v instanceof Date ? v : new Date(s);
+    if (d && !isNaN(d.getTime())) return (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
+    return s;
   }
 
   el.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;min-width:900px;">' +
@@ -5265,7 +5272,13 @@ function exportFormerEmployees() {
 
   function fmtDate(v) {
     if (!v) return '';
-    var s = String(v).slice(0,10);
+    var s = String(v).trim();
+    if (!s) return '';
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return s;
+    var mx = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (mx) return parseInt(mx[2]) + '/' + parseInt(mx[3]) + '/' + mx[1];
+    var d = v instanceof Date ? v : new Date(s);
+    if (d && !isNaN(d.getTime())) return (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
     return s;
   }
 
